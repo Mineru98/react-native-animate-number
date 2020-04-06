@@ -1,6 +1,6 @@
 /**
- * @author wkh237
- * @version 0.1.1
+ * @author Mineru98
+ * @version 0.2.0
  */
 
 // @flow
