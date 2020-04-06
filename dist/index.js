@@ -17,16 +17,12 @@ const HALF_RAD = Math.PI/2
 export default class AnimateNumber extends Component {
 
   props : {
-    countBy? : ?number,
+    countby? : ?number,
     interval? : ?number,
     steps? : ?number,
     value : number,
     timing : 'linear' | 'easeOut' | 'easeIn' | () => number,
-    formatter : () => {},
     onProgress : () => {},
-    onFinish : () => {},
-    startAt? : number,
-    initialValue? : number
   };
 
   static defaultProps = {
@@ -34,9 +30,6 @@ export default class AnimateNumber extends Component {
     timing : 'linear',
     steps : 45,
     value : 0,
-    initialValue : 0,
-    formatter : (val) => val,
-    onFinish : () => {}
   };
 
   static TimingFunctions = {
@@ -80,8 +73,8 @@ export default class AnimateNumber extends Component {
     super(props);
     // default values of state and non-state variables
     this.state = {
-      value : props.initialValue,
-      displayValue : props.formatter(props.initialValue)
+      value : 0,
+      displayValue : 0
     }
     this.dirty = false;
     this.startFrom = 0;
@@ -92,14 +85,10 @@ export default class AnimateNumber extends Component {
     this.startFrom = this.state.value
     this.endWith = this.props.value
     this.dirty = true
-    setTimeout(
-      () => {
-        this.startAnimate()
-      }
-      , this.props.startAt != null ? this.props.startAt : 0);
+    this.startAnimate()
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  UNSAFE_componentWillUpdate(nextProps, nextState) {
 
     // check if start an animation
     if(this.props.value !== nextProps.value) {
@@ -140,9 +129,8 @@ export default class AnimateNumber extends Component {
     Timer.setTimeout(() => {
 
       let value = (this.endWith - this.startFrom)/this.props.steps
-      let sign = value >= 0 ? 1 : -1
-      if(this.props.countBy)
-        value = sign*Math.abs(this.props.countBy)
+      if(this.props.countby)
+        value = Math.sign(value)*Math.abs(this.props.countby)
       let total = parseFloat(this.state.value) + parseFloat(value)
 
       this.direction = (value > 0)
@@ -150,7 +138,6 @@ export default class AnimateNumber extends Component {
       if (((this.direction) ^ (total <= this.endWith)) === 1) {
         this.dirty = false
         total = this.endWith
-        this.props.onFinish(total, this.props.formatter(total))
       }
 
       if(this.props.onProgress)
@@ -158,7 +145,7 @@ export default class AnimateNumber extends Component {
 
       this.setState({
         value : total,
-        displayValue : this.props.formatter(total)
+        displayValue : total
       })
 
     }, this.getTimingFunction(this.props.interval, progress))
